@@ -6,535 +6,267 @@
 <title>نقاطي - نظام النجوم</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --primary: #1a3c5e;
-    --accent:  #f0a500;
-    --bg:      #f4f7fb;
-    --card:    #ffffff;
-    --text:    #1a2b3c;
-    --muted:   #7a8fa6;
-    --border:  #d8e4f0;
-    --success: #2ecc71;
-    --danger:  #e74c3c;
-    --gold:    #f0a500;
-    --silver:  #95a5a6;
-    --bronze:  #cd7f32;
-  }
-
+  :root { --primary:#1a3c5e; --accent:#f0a500; --bg:#f4f7fb; --card:#fff; --text:#1a2b3c; --muted:#7a8fa6; --border:#d8e4f0; --success:#2ecc71; --danger:#e74c3c; }
   * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Tajawal',sans-serif; background:var(--bg); min-height:100vh; color:var(--text); }
 
-  body {
-    font-family: 'Tajawal', sans-serif;
-    background: var(--bg);
-    min-height: 100vh;
-    color: var(--text);
-  }
+  .topbar { background:var(--primary); padding:0 20px; height:56px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 12px rgba(26,60,94,0.2); }
+  .topbar-brand { display:flex; align-items:center; gap:8px; color:white; font-size:15px; font-weight:700; }
+  .topbar-brand .icon { width:30px; height:30px; background:var(--accent); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+  .btn-logout { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:5px 14px; border-radius:8px; font-family:'Tajawal',sans-serif; font-size:13px; cursor:pointer; }
+  .btn-logout:hover { background:rgba(255,255,255,0.2); }
 
-  /* ====== الشريط العلوي ====== */
-  .topbar {
-    background: var(--primary);
-    padding: 0 20px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 12px rgba(26,60,94,0.2);
-  }
+  .content { max-width:480px; margin:0 auto; padding:20px 16px 40px; }
 
-  .topbar-brand {
-    display: flex; align-items: center; gap: 8px;
-    color: white; font-size: 15px; font-weight: 700;
-  }
+  /* بطاقة الترحيب */
+  .welcome-card { background:linear-gradient(135deg,var(--primary) 0%,#0f2a45 100%); border-radius:24px; padding:28px 24px; color:white; margin-bottom:16px; position:relative; overflow:hidden; }
+  .welcome-card::before { content:'⭐'; position:absolute; font-size:120px; left:-20px; top:-20px; opacity:0.07; line-height:1; }
+  .student-label { font-size:12px; font-weight:600; color:rgba(255,255,255,0.6); margin-bottom:4px; }
+  .student-welcome-name { font-size:22px; font-weight:800; margin-bottom:2px; }
+  .student-class { font-size:13px; color:rgba(255,255,255,0.65); margin-bottom:24px; }
+  .points-display { display:flex; align-items:flex-end; gap:6px; margin-bottom:6px; }
+  .points-number { font-size:64px; font-weight:900; line-height:1; color:var(--accent); }
+  .points-unit { font-size:18px; font-weight:600; color:rgba(255,255,255,0.7); padding-bottom:10px; }
+  .points-week-label { font-size:12px; color:rgba(255,255,255,0.5); }
 
-  .topbar-brand .icon {
-    width: 30px; height: 30px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-  }
+  .progress-section { margin-top:20px; }
+  .progress-label { display:flex; justify-content:space-between; font-size:12px; color:rgba(255,255,255,0.6); margin-bottom:8px; }
+  .progress-bar { height:8px; background:rgba(255,255,255,0.15); border-radius:10px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),#ffcc44); border-radius:10px; transition:width 1s ease; }
 
-  .btn-logout {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: white;
-    padding: 5px 14px;
-    border-radius: 8px;
-    font-family: 'Tajawal', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-logout:hover { background: rgba(255,255,255,0.2); }
+  /* بطاقة المركز */
+  .rank-card { background:var(--card); border-radius:20px; padding:20px; margin-bottom:16px; box-shadow:0 2px 16px rgba(26,60,94,0.07); display:flex; align-items:center; gap:16px; }
+  .rank-medal { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; flex-shrink:0; position:relative; }
+  .rank-medal.gold   { background:linear-gradient(135deg,#fff4cc,#ffe066); }
+  .rank-medal.silver { background:linear-gradient(135deg,#e8e8e8,#c0c0c0); }
+  .rank-medal.bronze { background:linear-gradient(135deg,#f5dfc4,#cd7f32); }
+  .rank-medal.other  { background:linear-gradient(135deg,#e8f4fd,#b8d8f0); }
+  .rank-number { position:absolute; bottom:-2px; left:50%; transform:translateX(-50%); font-size:11px; font-weight:800; background:var(--primary); color:white; padding:1px 7px; border-radius:10px; }
+  .rank-info { flex:1; }
+  .rank-title { font-size:12px; color:var(--muted); margin-bottom:3px; }
+  .rank-value { font-size:20px; font-weight:800; color:var(--text); margin-bottom:2px; }
+  .rank-sub   { font-size:12px; color:var(--muted); }
 
-  /* ====== المحتوى ====== */
-  .content {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 20px 16px 40px;
-  }
+  /* رسالة تحفيز */
+  .motivate-card { background:linear-gradient(135deg,#fff8e6,#fff3cc); border:1px solid #ffe082; border-radius:18px; padding:16px 20px; margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+  .motivate-icon { font-size:28px; }
+  .motivate-text { font-size:14px; font-weight:600; color:#7a4f00; }
+  .motivate-sub  { font-size:12px; color:#a06800; margin-top:2px; }
 
-  /* ====== بطاقة الترحيب ====== */
-  .welcome-card {
-    background: linear-gradient(135deg, var(--primary) 0%, #0f2a45 100%);
-    border-radius: 24px;
-    padding: 28px 24px;
-    color: white;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-    animation: slideDown 0.5s ease;
-  }
+  /* إجماليات */
+  .stats-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  .stat-card { background:var(--card); border-radius:18px; padding:18px 16px; box-shadow:0 2px 16px rgba(26,60,94,0.07); text-align:center; }
+  .stat-icon { font-size:26px; margin-bottom:8px; }
+  .stat-value { font-size:26px; font-weight:900; color:var(--primary); margin-bottom:2px; }
+  .stat-label { font-size:12px; color:var(--muted); font-weight:500; }
 
-  .welcome-card::before {
-    content: '⭐';
-    position: absolute;
-    font-size: 120px;
-    left: -20px; top: -20px;
-    opacity: 0.07;
-    line-height: 1;
-  }
+  /* سجل النقاط */
+  .history-card { background:var(--card); border-radius:20px; overflow:hidden; box-shadow:0 2px 16px rgba(26,60,94,0.07); }
+  .history-header { padding:16px 20px; border-bottom:1px solid var(--border); font-size:15px; font-weight:700; }
+  .history-row { display:flex; align-items:center; padding:13px 20px; border-bottom:1px solid var(--border); gap:12px; transition:background 0.15s; }
+  .history-row:last-child { border-bottom:none; }
+  .history-row:hover { background:#f8fafc; }
+  .history-dot { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; }
+  .history-dot.pos { background:#e8f5e9; color:#2e7d32; }
+  .history-dot.neg { background:#fdecea; color:#c62828; }
+  .history-info { flex:1; }
+  .history-teacher { font-size:13px; font-weight:600; margin-bottom:2px; }
+  .history-date    { font-size:11px; color:var(--muted); }
+  .history-pts { font-size:16px; font-weight:800; }
+  .history-pts.pos { color:#2e7d32; }
+  .history-pts.neg { color:var(--danger); }
 
-  .welcome-card::after {
-    content: '🏆';
-    position: absolute;
-    font-size: 90px;
-    left: 20px; bottom: -15px;
-    opacity: 0.08;
-    line-height: 1;
-  }
+  .empty-history { text-align:center; padding:32px; color:var(--muted); font-size:14px; }
 
-  .student-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.6);
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-  }
-
-  .student-welcome-name {
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 2px;
-  }
-
-  .student-class {
-    font-size: 13px;
-    color: rgba(255,255,255,0.65);
-    margin-bottom: 24px;
-  }
-
-  /* النقاط الكبيرة */
-  .points-display {
-    display: flex;
-    align-items: flex-end;
-    gap: 6px;
-    margin-bottom: 6px;
-  }
-
-  .points-number {
-    font-size: 64px;
-    font-weight: 900;
-    line-height: 1;
-    color: var(--accent);
-    animation: countUp 0.8s ease;
-  }
-
-  .points-unit {
-    font-size: 18px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.7);
-    padding-bottom: 10px;
-  }
-
-  .points-week-label {
-    font-size: 12px;
-    color: rgba(255,255,255,0.5);
-  }
-
-  /* ====== شريط التقدم ====== */
-  .progress-section {
-    margin-top: 20px;
-  }
-
-  .progress-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: rgba(255,255,255,0.6);
-    margin-bottom: 8px;
-  }
-
-  .progress-bar {
-    height: 8px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), #ffcc44);
-    border-radius: 10px;
-    transition: width 1s ease;
-    animation: fillBar 1.2s ease forwards;
-  }
-
-  @keyframes fillBar {
-    from { width: 0%; }
-  }
-
-  /* ====== بطاقة المركز ====== */
-  .rank-card {
-    background: var(--card);
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 16px rgba(26,60,94,0.07);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    animation: slideUp 0.5s ease 0.1s both;
-  }
-
-  .rank-medal {
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 30px;
-    flex-shrink: 0;
-    position: relative;
-  }
-
-  .rank-medal.gold   { background: linear-gradient(135deg, #fff4cc, #ffe066); }
-  .rank-medal.silver { background: linear-gradient(135deg, #e8e8e8, #c0c0c0); }
-  .rank-medal.bronze { background: linear-gradient(135deg, #f5dfc4, #cd7f32); }
-  .rank-medal.other  { background: linear-gradient(135deg, #e8f4fd, #b8d8f0); }
-
-  .rank-number {
-    position: absolute;
-    bottom: -2px; left: 50%;
-    transform: translateX(-50%);
-    font-size: 11px;
-    font-weight: 800;
-    background: var(--primary);
-    color: white;
-    padding: 1px 7px;
-    border-radius: 10px;
-  }
-
-  .rank-info { flex: 1; }
-
-  .rank-title {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 3px;
-  }
-
-  .rank-value {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--text);
-    margin-bottom: 2px;
-  }
-
-  .rank-sub {
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  /* ====== بطاقتا الإجمالي ====== */
-  .stats-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-    animation: slideUp 0.5s ease 0.2s both;
-  }
-
-  .stat-card {
-    background: var(--card);
-    border-radius: 18px;
-    padding: 18px 16px;
-    box-shadow: 0 2px 16px rgba(26,60,94,0.07);
-    text-align: center;
-  }
-
-  .stat-icon { font-size: 26px; margin-bottom: 8px; }
-
-  .stat-value {
-    font-size: 26px;
-    font-weight: 900;
-    color: var(--primary);
-    margin-bottom: 2px;
-  }
-
-  .stat-label {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 500;
-  }
-
-  /* ====== سجل النقاط الأخيرة ====== */
-  .history-card {
-    background: var(--card);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 2px 16px rgba(26,60,94,0.07);
-    animation: slideUp 0.5s ease 0.3s both;
-  }
-
-  .history-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .history-row {
-    display: flex;
-    align-items: center;
-    padding: 13px 20px;
-    border-bottom: 1px solid var(--border);
-    gap: 12px;
-    transition: background 0.15s;
-  }
-
-  .history-row:last-child { border-bottom: none; }
-  .history-row:hover { background: #f8fafc; }
-
-  .history-dot {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    font-weight: 800;
-    flex-shrink: 0;
-  }
-
-  .history-dot.pos { background: #e8f5e9; color: #2e7d32; }
-  .history-dot.neg { background: #fdecea; color: #c62828; }
-
-  .history-info { flex: 1; }
-
-  .history-teacher {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 2px;
-  }
-
-  .history-date {
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  .history-pts {
-    font-size: 16px;
-    font-weight: 800;
-  }
-
-  .history-pts.pos { color: #2e7d32; }
-  .history-pts.neg { color: var(--danger); }
-
-  /* ====== تحفيز ====== */
-  .motivate-card {
-    background: linear-gradient(135deg, #fff8e6, #fff3cc);
-    border: 1px solid #ffe082;
-    border-radius: 18px;
-    padding: 16px 20px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    animation: slideUp 0.5s ease 0.15s both;
-  }
-
-  .motivate-icon { font-size: 28px; }
-
-  .motivate-text { font-size: 14px; font-weight: 600; color: #7a4f00; }
-  .motivate-sub  { font-size: 12px; color: #a06800; margin-top: 2px; }
-
-  /* ====== أنيميشن ====== */
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-15px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(15px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes countUp {
-    from { opacity: 0; transform: scale(0.5); }
-    to   { opacity: 1; transform: scale(1); }
-  }
+  /* لودينق */
+  .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 </style>
 </head>
 <body>
 
-<!-- الشريط العلوي -->
 <div class="topbar">
-  <div class="topbar-brand">
-    <div class="icon">⭐</div>
-    <span>نظام النجوم</span>
-  </div>
-  <button class="btn-logout" onclick="window.location='login.html'">خروج</button>
+  <div class="topbar-brand"><div class="icon">⭐</div><span>نظام النجوم</span></div>
+  <button class="btn-logout" onclick="logout()">خروج</button>
 </div>
 
-<!-- المحتوى -->
 <div class="content">
 
-  <!-- بطاقة الترحيب + النقاط -->
   <div class="welcome-card">
     <div class="student-label">مرحباً بك 👋</div>
-    <div class="student-welcome-name">أحمد محمد العتيبي</div>
-    <div class="student-class">الصف الرابع أ</div>
-
+    <div class="student-welcome-name" id="studentName">...</div>
+    <div class="student-class" id="studentClass">...</div>
     <div class="points-display">
       <div class="points-number" id="weekPts">0</div>
       <div class="points-unit">نقطة</div>
     </div>
     <div class="points-week-label">نقاط هذا الأسبوع</div>
-
-    <!-- شريط التقدم نحو المركز الأول -->
     <div class="progress-section">
       <div class="progress-label">
         <span>تقدمك نحو المركز الأول</span>
-        <span id="progressLbl">23 / 38</span>
+        <span id="progressLbl">0 / 0</span>
       </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill" style="width: 60%"></div>
-      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
     </div>
   </div>
 
-  <!-- بطاقة المركز -->
   <div class="rank-card">
-    <div class="rank-medal gold" id="rankMedal">
-      🥈
-      <span class="rank-number" id="rankNum">2</span>
+    <div class="rank-medal other" id="rankMedal">
+      <span id="rankEmoji">🏅</span>
+      <span class="rank-number" id="rankNum">-</span>
     </div>
     <div class="rank-info">
       <div class="rank-title">ترتيبك في الفصل هذا الأسبوع</div>
-      <div class="rank-value" id="rankText">المركز الثاني</div>
-      <div class="rank-sub" id="rankSub">متقدم على 4 طلاب 💪</div>
+      <div class="rank-value" id="rankText">جاري التحميل...</div>
+      <div class="rank-sub" id="rankSub"></div>
     </div>
   </div>
 
-  <!-- رسالة تحفيز -->
-  <div class="motivate-card">
+  <div class="motivate-card" id="motivateCard" style="display:none;">
     <div class="motivate-icon">🎯</div>
     <div>
-      <div class="motivate-text">أنت على بُعد 15 نقطة من المركز الأول!</div>
+      <div class="motivate-text" id="motivateText"></div>
       <div class="motivate-sub">استمر في التميز وستصل 🌟</div>
     </div>
   </div>
 
-  <!-- إجماليات -->
   <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-icon">📅</div>
-      <div class="stat-value" id="monthPts">87</div>
-      <div class="stat-label">نقاط هذا الشهر</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">🏆</div>
-      <div class="stat-value" id="totalPts">312</div>
-      <div class="stat-label">إجمالي نقاط السنة</div>
-    </div>
+    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value" id="monthPts">-</div><div class="stat-label">نقاط هذا الشهر</div></div>
+    <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-value" id="totalPts">-</div><div class="stat-label">إجمالي السنة</div></div>
   </div>
 
-  <!-- سجل النقاط -->
   <div class="history-card">
-    <div class="history-header">
-      📋 آخر التقييمات
-    </div>
-
-    <div class="history-row">
-      <div class="history-dot pos">+5</div>
-      <div class="history-info">
-        <div class="history-teacher">أ. محمد العتيبي</div>
-        <div class="history-date">اليوم — 10:30 ص</div>
-      </div>
-      <div class="history-pts pos">+5</div>
-    </div>
-
-    <div class="history-row">
-      <div class="history-dot pos">+4</div>
-      <div class="history-info">
-        <div class="history-teacher">أ. خالد الزهراني</div>
-        <div class="history-date">أمس — 11:15 ص</div>
-      </div>
-      <div class="history-pts pos">+4</div>
-    </div>
-
-    <div class="history-row">
-      <div class="history-dot neg">-2</div>
-      <div class="history-info">
-        <div class="history-teacher">أ. سعد الغامدي</div>
-        <div class="history-date">أمس — 9:00 ص</div>
-      </div>
-      <div class="history-pts neg">-2</div>
-    </div>
-
-    <div class="history-row">
-      <div class="history-dot pos">+3</div>
-      <div class="history-info">
-        <div class="history-teacher">أ. محمد العتيبي</div>
-        <div class="history-date">الأحد — 10:00 ص</div>
-      </div>
-      <div class="history-pts pos">+3</div>
-    </div>
-
-    <div class="history-row">
-      <div class="history-dot pos">+5</div>
-      <div class="history-info">
-        <div class="history-teacher">أ. فهد القحطاني</div>
-        <div class="history-date">الأحد — 8:45 ص</div>
-      </div>
-      <div class="history-pts pos">+5</div>
-    </div>
-
+    <div class="history-header">📋 آخر التقييمات</div>
+    <div id="historyList"><div class="empty-history">جاري التحميل...</div></div>
   </div>
 
 </div>
 
-<script>
-  // محاكاة عداد النقاط يعد تصاعدياً
-  const target = 23;
-  let current  = 0;
-  const duration = 800;
-  const step = Math.ceil(target / (duration / 16));
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs, orderBy, limit }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const counter = setInterval(() => {
-    current = Math.min(current + step, target);
-    document.getElementById('weekPts').textContent = current;
-    if (current >= target) clearInterval(counter);
-  }, 16);
+const app = initializeApp({ apiKey:"AIzaSyBvOLYvQ7QH4VOOidQ165F2Ao6_9fBi4g8", authDomain:"anas-96718.firebaseapp.com", projectId:"anas-96718", storageBucket:"anas-96718.firebasestorage.app", messagingSenderId:"459362938160", appId:"1:459362938160:web:5cc9c88bedfc3e95d06cf5" });
+const db = getFirestore(app);
 
-  // ضبط المركز والميدالية
-  const rank = 2;
-  const medals = ['🥇','🥈','🥉'];
-  const medalClasses = ['gold','silver','bronze'];
-  const rankNames = ['المركز الأول','المركز الثاني','المركز الثالث'];
+// ====== التحقق من الجلسة ======
+const raw = sessionStorage.getItem('student');
+if (!raw) { window.location.href='login.html'; }
+const student = JSON.parse(raw);
 
-  if (rank <= 3) {
-    document.getElementById('rankMedal').className = `rank-medal ${medalClasses[rank-1]}`;
-    document.querySelector('.rank-medal').textContent = medals[rank-1];
-    // نعيد الرقم بعد تغيير textContent
-    const rn = document.createElement('span');
-    rn.className = 'rank-number'; rn.id = 'rankNum'; rn.textContent = rank;
-    document.querySelector('.rank-medal').appendChild(rn);
+// ====== رقم الأسبوع ======
+function getWeekKey() {
+  const now=new Date(), year=now.getFullYear();
+  const start=new Date(year,0,1);
+  const week=Math.ceil(((now-start)/86400000+start.getDay()+1)/7);
+  return `${year}-W${String(week).padStart(2,'0')}`;
+}
+
+function getMonthKey() {
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+// ====== عداد متحرك ======
+function animateCount(el, target) {
+  let current=0;
+  const step=Math.max(1,Math.ceil(Math.abs(target)/40));
+  const timer=setInterval(()=>{
+    current = target>=0 ? Math.min(current+step,target) : Math.max(current-step,target);
+    el.textContent=current;
+    if(current===target) clearInterval(timer);
+  },20);
+}
+
+// ====== تحميل البيانات ======
+async function loadData() {
+  document.getElementById('studentName').textContent  = student.name;
+  document.getElementById('studentClass').textContent = student.className;
+  document.getElementById('monthPts').textContent     = student.monthlyPoints || 0;
+  document.getElementById('totalPts').textContent     = student.totalPoints   || 0;
+
+  const weekPts = student.weeklyPoints || 0;
+  animateCount(document.getElementById('weekPts'), weekPts);
+
+  // ====== جلب ترتيب الطالب في الفصل ======
+  const weekKey = getWeekKey();
+  const classSnap = await getDocs(query(collection(db,'students'), where('classId','==',student.classId)));
+  const classStudents = classSnap.docs.map(d=>({id:d.id,...d.data()}));
+
+  // ترتيب حسب نقاط الأسبوع
+  classStudents.sort((a,b)=>(b.weeklyPoints||0)-(a.weeklyPoints||0));
+  const rank    = classStudents.findIndex(s=>s.id===student.id)+1;
+  const total   = classStudents.length;
+  const topPts  = classStudents[0]?.weeklyPoints || 0;
+
+  // شريط التقدم
+  const pct = topPts>0 ? Math.round((weekPts/topPts)*100) : 100;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressLbl').textContent  = `${weekPts} / ${topPts}`;
+
+  // الميدالية
+  const medals  = ['🥇','🥈','🥉'];
+  const classes = ['gold','silver','bronze'];
+  const names   = ['المركز الأول','المركز الثاني','المركز الثالث'];
+  const medal   = document.getElementById('rankMedal');
+  medal.className = 'rank-medal '+(rank<=3?classes[rank-1]:'other');
+  document.getElementById('rankEmoji').textContent = rank<=3 ? medals[rank-1] : '🏅';
+  document.getElementById('rankNum').textContent   = rank;
+  document.getElementById('rankText').textContent  = rank<=3 ? names[rank-1] : `المركز ${rank}`;
+  document.getElementById('rankSub').textContent   = rank<total ? `متقدم على ${total-rank} طالب 💪` : 'أنت في آخر الترتيب، بالتوفيق!';
+
+  // رسالة التحفيز
+  if (rank>1 && topPts>weekPts) {
+    const diff = topPts - weekPts;
+    document.getElementById('motivateText').textContent = `أنت على بُعد ${diff} نقطة من المركز الأول!`;
+    document.getElementById('motivateCard').style.display='flex';
   }
 
-  document.getElementById('rankText').textContent = rankNames[rank-1] || `المركز ${rank}`;
-</script>
+  // ====== آخر التقييمات ======
+  await loadHistory();
+}
 
+async function loadHistory() {
+  const q = query(
+    collection(db,'points_log'),
+    where('studentId','==',student.id),
+    orderBy('createdAt','desc'),
+    limit(10)
+  );
+
+  const snap = await getDocs(q);
+  const list = document.getElementById('historyList');
+
+  if (snap.empty) {
+    list.innerHTML='<div class="empty-history">لا توجد تقييمات بعد</div>';
+    return;
+  }
+
+  list.innerHTML = snap.docs.map(d => {
+    const log = d.data();
+    const pts = log.points;
+    const isPos = pts > 0;
+    const date = log.createdAt?.toDate ? log.createdAt.toDate().toLocaleDateString('ar-SA',{weekday:'long',hour:'2-digit',minute:'2-digit'}) : '';
+    return `
+      <div class="history-row">
+        <div class="history-dot ${isPos?'pos':'neg'}">${isPos?'+'+pts:pts}</div>
+        <div class="history-info">
+          <div class="history-teacher">${log.teacherName||'معلم'}</div>
+          <div class="history-date">${date}</div>
+        </div>
+        <div class="history-pts ${isPos?'pos':'neg'}">${isPos?'+'+pts:pts}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.logout = () => {
+  sessionStorage.removeItem('student');
+  window.location.href='login.html';
+};
+
+loadData();
+</script>
 </body>
 </html>
