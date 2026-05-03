@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شاشة المدرسة - نظام النجوم</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --primary:#1a3c5e; --accent:#f0a500; --gold:#f0a500; --silver:#b0bec5; --bronze:#cd7f32; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family:'Tajawal',sans-serif;
+    background:#0a1628;
+    min-height:100vh;
+    overflow:hidden;
+    color:white;
+  }
+
+  /* ====== الخلفية المتحركة ====== */
+  .bg-stars {
+    position:fixed; inset:0; z-index:0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(26,60,94,0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(240,165,0,0.1) 0%, transparent 40%),
+      #0a1628;
+  }
+
+  /* ====== الهيدر ====== */
+  .header {
+    position:relative; z-index:10;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 40px 0;
+  }
+
+  .school-brand { display:flex; align-items:center; gap:14px; }
+  .school-logo {
+    width:56px; height:56px;
+    background:var(--accent);
+    border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:28px;
+    box-shadow:0 4px 20px rgba(240,165,0,0.4);
+  }
+  .school-name { font-size:22px; font-weight:800; }
+  .school-sub  { font-size:13px; color:rgba(255,255,255,0.5); margin-top:2px; }
+
+  .header-right { text-align:left; }
+  .live-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(46,204,113,0.15);
+    border:1px solid rgba(46,204,113,0.3);
+    padding:6px 14px; border-radius:20px;
+    font-size:13px; font-weight:600; color:#2ecc71;
+    margin-bottom:6px;
+  }
+  .live-dot { width:8px; height:8px; background:#2ecc71; border-radius:50%; animation:blink 1.5s infinite; }
+  .current-time { font-size:13px; color:rgba(255,255,255,0.4); text-align:center; }
+
+  /* ====== المحتوى الرئيسي ====== */
+  .main { position:relative; z-index:10; padding:20px 40px 30px; }
+
+  /* ====== اسم الفصل ====== */
+  .class-title-wrap {
+    text-align:center;
+    margin-bottom:30px;
+    animation:slideDown 0.6s ease;
+  }
+  .class-badge {
+    display:inline-flex; align-items:center; gap:10px;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.1);
+    padding:10px 28px; border-radius:40px;
+    font-size:24px; font-weight:800;
+    margin-bottom:6px;
+  }
+  .class-badge .cls-icon { font-size:20px; }
+  .week-label { font-size:13px; color:rgba(255,255,255,0.4); }
+
+  /* ====== بطاقات المراكز ====== */
+  .podium {
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:20px;
+  }
+
+  .rank-card {
+    flex:1; max-width:280px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:24px;
+    padding:28px 20px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+    transition:all 0.5s ease;
+  }
+
+  .rank-card::before {
+    content:'';
+    position:absolute; inset:0;
+    opacity:0.04;
+    border-radius:24px;
+  }
+
+  /* المركز الأول أكبر */
+  .rank-card.first {
+    transform:translateY(-20px);
+    border-color:rgba(240,165,0,0.3);
+    background:rgba(240,165,0,0.08);
+    box-shadow:0 20px 60px rgba(240,165,0,0.15);
+  }
+  .rank-card.first::before { background:var(--gold); opacity:0.06; }
+
+  .rank-card.second { border-color:rgba(176,190,197,0.2); }
+  .rank-card.third  { border-color:rgba(205,127,50,0.2);  }
+
+  /* أيقونة المركز */
+  .rank-icon {
+    font-size:52px;
+    margin-bottom:16px;
+    display:block;
+    filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  }
+  .rank-card.first  .rank-icon { font-size:64px; }
+
+  /* رقم المركز */
+  .rank-num {
+    position:absolute; top:16px; right:16px;
+    width:32px; height:32px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:900;
+  }
+  .rank-card.first  .rank-num { background:var(--gold);   color:#1a1a00; }
+  .rank-card.second .rank-num { background:var(--silver); color:#1a1a1a; }
+  .rank-card.third  .rank-num { background:var(--bronze); color:#fff; }
+
+  /* اسم الطالب */
+  .student-name-display {
+    font-size:18px; font-weight:800;
+    margin-bottom:6px;
+    line-height:1.3;
+  }
+  .rank-card.first .student-name-display { font-size:22px; }
+
+  /* النقاط */
+  .pts-value {
+    font-size:42px; font-weight:900;
+    line-height:1;
+    margin-bottom:4px;
+  }
+  .rank-card.first  .pts-value { font-size:56px; color:var(--gold); }
+  .rank-card.second .pts-value { color:var(--silver); }
+  .rank-card.third  .pts-value { color:var(--bronze); }
+
+  .pts-label { font-size:12px; color:rgba(255,255,255,0.4); }
+
+  /* ====== مؤشر الانتقال ====== */
+  .class-dots {
+    display:flex; justify-content:center; gap:8px;
+    margin-top:28px;
+    position:relative; z-index:10;
+  }
+  .class-dot {
+    width:8px; height:8px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.2);
+    transition:all 0.4s ease;
+    cursor:pointer;
+  }
+  .class-dot.active { background:var(--accent); width:24px; border-radius:4px; }
+
+  /* ====== شريط الفصل التالي ====== */
+  .next-bar {
+    position:fixed; bottom:0; left:0; right:0;
+    height:5px; background:rgba(255,255,255,0.1);
+    z-index:20;
+  }
+  .next-progress {
+    height:100%;
+    background:var(--accent);
+    width:0%;
+    transition:none;
+  }
+
+  /* ====== حالة فارغة ====== */
+  .empty-podium {
+    text-align:center; padding:60px 20px;
+    color:rgba(255,255,255,0.3);
+    font-size:16px;
+  }
+  .empty-podium .big { font-size:48px; margin-bottom:12px; }
+
+  /* ====== أنيميشن ====== */
+  @keyframes slideDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn    { from{opacity:0} to{opacity:1} }
+  @keyframes blink     { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes countUp   { from{opacity:0;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
+
+  .podium { animation:fadeIn 0.6s ease; }
+</style>
+</head>
+<body>
+
+<div class="bg-stars"></div>
+
+<!-- الهيدر -->
+<div class="header">
+  <div class="school-brand">
+    <div class="school-logo">⭐</div>
+    <div>
+      <div class="school-name">نظام النجوم المدرسي</div>
+      <div class="school-sub">لوحة الشرف الأسبوعية</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div> مباشر</div>
+    <div class="current-time" id="clock"></div>
+  </div>
+</div>
+
+<!-- المحتوى -->
+<div class="main">
+
+  <!-- اسم الفصل -->
+  <div class="class-title-wrap">
+    <div class="class-badge">
+      <span class="cls-icon">🏫</span>
+      <span id="classTitle">جاري التحميل...</span>
+    </div>
+    <div class="week-label" id="weekLabel"></div>
+  </div>
+
+  <!-- المنصة -->
+  <div class="podium" id="podium">
+    <div class="empty-podium"><div class="big">⏳</div>جاري تحميل البيانات...</div>
+  </div>
+
+  <!-- نقاط التنقل -->
+  <div class="class-dots" id="classDots"></div>
+</div>
+
+<!-- شريط التقدم للفصل التالي -->
+<div class="next-bar"><div class="next-progress" id="nextProgress"></div></div>
+
+<script type="module">
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, query, where, onSnapshot, orderBy, limit }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({ apiKey:"AIzaSyBvOLYvQ7QH4VOOidQ165F2Ao6_9fBi4g8", authDomain:"anas-96718.firebaseapp.com", projectId:"anas-96718", storageBucket:"anas-96718.firebasestorage.app", messagingSenderId:"459362938160", appId:"1:459362938160:web:5cc9c88bedfc3e95d06cf5" });
+const db = getFirestore(app);
+
+const CLASSES = [
+  { id:'4A', name:'الصف الرابع أ' },
+  { id:'4B', name:'الصف الرابع ب' },
+  { id:'5A', name:'الصف الخامس أ' },
+  { id:'5B', name:'الصف الخامس ب' },
+  { id:'6A', name:'الصف السادس أ' },
+  { id:'6B', name:'الصف السادس ب' },
+];
+
+const INTERVAL   = 12000; // 12 ثانية لكل فصل
+let currentIndex = 0;
+let classData    = {}; // id -> sorted students
+let timer        = null;
+let progressTimer = null;
+let unsubscribers = [];
+
+// ====== رقم الأسبوع ======
+function getWeekKey() {
+  const now=new Date(), year=now.getFullYear();
+  const start=new Date(year,0,1);
+  const week=Math.ceil(((now-start)/86400000+start.getDay()+1)/7);
+  return `${year}-W${String(week).padStart(2,'0')}`;
+}
+
+// ====== الساعة ======
+function updateClock() {
+  const now=new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock,1000); updateClock();
+
+// ====== نقاط التنقل ======
+function renderDots() {
+  const wrap=document.getElementById('classDots');
+  wrap.innerHTML=CLASSES.map((_,i)=>
+    `<div class="class-dot ${i===currentIndex?'active':''}" onclick="goToClass(${i})"></div>`
+  ).join('');
+}
+
+window.goToClass = i => {
+  currentIndex=i;
+  showClass(i);
+  resetProgress();
+};
+
+// ====== عرض الفصل ======
+function showClass(idx) {
+  const cls     = CLASSES[idx];
+  const students = classData[cls.id] || [];
+  const top3    = students.slice(0,3);
+
+  document.getElementById('classTitle').textContent = cls.name;
+
+  const weekKey = getWeekKey();
+  const d=new Date();
+  document.getElementById('weekLabel').textContent =
+    `الأسبوع ${weekKey} — ${d.toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}`;
+
+  const podium=document.getElementById('podium');
+  podium.innerHTML='';
+
+  if (top3.length===0) {
+    podium.innerHTML='<div class="empty-podium"><div class="big">📭</div>لا توجد نقاط هذا الأسبوع</div>';
+    renderDots(); return;
+  }
+
+  // ترتيب العرض: 2، 1، 3 (المركز الأول في المنتصف)
+  const order = top3.length===1 ? [top3[0]] :
+                top3.length===2 ? [top3[1], top3[0]] :
+                [top3[1], top3[0], top3[2]];
+
+  const rankClass = ['second','first','third'];
+  const rankNum   = [2, 1, 3];
+  const medals    = ['🥈','🥇','🥉'];
+
+  order.forEach((student, i) => {
+    const realRank = top3.indexOf(student)+1;
+    const card=document.createElement('div');
+    card.className=`rank-card ${rankClass[i]}`;
+    const pts = student.weeklyPoints||0;
+    card.innerHTML=`
+      <div class="rank-num">${realRank}</div>
+      <span class="rank-icon">${medals[i]}</span>
+      <div class="student-name-display">${student.name}</div>
+      <div class="pts-value" style="animation:countUp 0.5s ease">${pts}</div>
+      <div class="pts-label">نقطة هذا الأسبوع</div>
+    `;
+    podium.appendChild(card);
+  });
+
+  renderDots();
+}
+
+// ====== شريط التقدم ======
+function resetProgress() {
+  clearInterval(progressTimer);
+  const bar=document.getElementById('nextProgress');
+  bar.style.transition='none';
+  bar.style.width='0%';
+  setTimeout(()=>{
+    bar.style.transition=`width ${INTERVAL}ms linear`;
+    bar.style.width='100%';
+  },50);
+}
+
+// ====== الاستماع الحي لكل الطلاب ======
+function listenToAllStudents() {
+  // إلغاء المستمعين القدامى
+  unsubscribers.forEach(u=>u());
+  unsubscribers=[];
+
+  CLASSES.forEach(cls => {
+    const q = query(collection(db,'students'), where('classId','==',cls.id));
+    const unsub = onSnapshot(q, snap => {
+      const students = snap.docs.map(d=>({id:d.id,...d.data()}));
+      students.sort((a,b)=>(b.weeklyPoints||0)-(a.weeklyPoints||0));
+      classData[cls.id] = students;
+      // إذا الفصل الحالي هو المعروض، حدّثه
+      if (CLASSES[currentIndex].id===cls.id) showClass(currentIndex);
+    });
+    unsubscribers.push(unsub);
+  });
+}
+
+// ====== التناوب التلقائي ======
+function startCarousel() {
+  timer=setInterval(()=>{
+    currentIndex=(currentIndex+1)%CLASSES.length;
+    showClass(currentIndex);
+    resetProgress();
+  }, INTERVAL);
+}
+
+// ====== تهيئة ======
+listenToAllStudents();
+showClass(0);
+renderDots();
+resetProgress();
+startCarousel();
+</script>
+</body>
+</html>
