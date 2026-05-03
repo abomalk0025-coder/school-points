@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إعداد النظام</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Tajawal',sans-serif; background:#f4f7fb; padding:24px; color:#1a2b3c; }
+  h1 { font-size:20px; font-weight:800; color:#1a3c5e; margin-bottom:20px; }
+  .card { background:white; border-radius:16px; padding:20px; margin-bottom:16px; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+  .card h2 { font-size:15px; font-weight:700; margin-bottom:12px; color:#1a3c5e; }
+  .field { margin-bottom:12px; }
+  .field label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; }
+  .field input { width:100%; padding:10px 12px; border:2px solid #d8e4f0; border-radius:10px; font-family:'Tajawal',sans-serif; font-size:14px; outline:none; }
+  .field input:focus { border-color:#1a3c5e; }
+  .btn { width:100%; padding:13px; background:#1a3c5e; color:white; border:none; border-radius:12px; font-family:'Tajawal',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-top:4px; }
+  .btn:hover { background:#0f2a45; }
+  .btn.green { background:#2e7d32; }
+  .btn.green:hover { background:#1b5e20; }
+  .log { background:#1a2b3c; color:#a8d8a8; border-radius:12px; padding:16px; font-size:13px; line-height:1.8; min-height:120px; white-space:pre-wrap; margin-top:16px; }
+  .status { padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; margin-bottom:12px; }
+  .status.ok  { background:#e8f5e9; color:#2e7d32; }
+  .status.err { background:#fdecea; color:#c62828; }
+</style>
+</head>
+<body>
+
+<h1>⚙️ إعداد نظام النجوم المدرسي</h1>
+
+<!-- إنشاء حساب الإدارة -->
+<div class="card">
+  <h2>١. إنشاء حساب الإدارة</h2>
+  <div class="field">
+    <label>البريد الإلكتروني</label>
+    <input type="email" id="adminEmail" placeholder="admin@school.com" value="admin@school.com">
+  </div>
+  <div class="field">
+    <label>كلمة المرور</label>
+    <input type="password" id="adminPass" placeholder="كلمة مرور قوية" value="Admin@2024">
+  </div>
+  <button class="btn" onclick="createAdmin()">إنشاء حساب الإدارة</button>
+</div>
+
+<!-- إنشاء معلم تجريبي -->
+<div class="card">
+  <h2>٢. إنشاء معلم تجريبي</h2>
+  <div class="field">
+    <label>البريد الإلكتروني</label>
+    <input type="email" id="teacherEmail" placeholder="teacher@school.com" value="teacher1@school.com">
+  </div>
+  <div class="field">
+    <label>كلمة المرور</label>
+    <input type="password" id="teacherPass" value="Teacher@2024">
+  </div>
+  <div class="field">
+    <label>الاسم</label>
+    <input type="text" id="teacherName" value="أ. محمد العتيبي">
+  </div>
+  <button class="btn" onclick="createTeacher()">إنشاء حساب المعلم</button>
+</div>
+
+<!-- إضافة الفصول والطلاب التجريبيين -->
+<div class="card">
+  <h2>٣. إضافة الفصول والطلاب التجريبيين</h2>
+  <button class="btn green" onclick="seedData()">إضافة البيانات التجريبية 🚀</button>
+</div>
+
+<div id="logBox" class="log">جاهز للبدء...\n</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, writeBatch }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyBvOLYvQ7QH4VOOidQ165F2Ao6_9fBi4g8",
+  authDomain:        "anas-96718.firebaseapp.com",
+  projectId:         "anas-96718",
+  storageBucket:     "anas-96718.firebasestorage.app",
+  messagingSenderId: "459362938160",
+  appId:             "1:459362938160:web:5cc9c88bedfc3e95d06cf5"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+function log(msg) {
+  document.getElementById('logBox').textContent += msg + '\n';
+}
+
+// ====== بيانات الفصول والطلاب التجريبية ======
+const classesData = [
+  { id:"4A", name:"الصف الرابع أ",  students:["أحمد محمد العتيبي","سلطان عبدالله الغامدي","خالد سعد الزهراني","فهد علي القحطاني","عمر يوسف الدوسري","ماجد ناصر الشمري"] },
+  { id:"4B", name:"الصف الرابع ب",  students:["محمد سعيد البلوي","عبدالرحمن طارق","بدر فيصل الحربي","تركي وليد المطيري","راشد حمد العنزي","سعود جابر الرشيدي"] },
+  { id:"5A", name:"الصف الخامس أ",  students:["يوسف إبراهيم السبيعي","ابراهيم سالم الرويلي","حمود عادل المالكي","وليد حسين الجهني","صالح مشعل الثبيتي","منصور نواف العمري"] },
+  { id:"5B", name:"الصف الخامس ب",  students:["نواف سليمان الشهري","مساعد خالد العجمي","فيصل سطام الجهني","ريان عمر المقرن","عبدالعزيز سلطان","حازم محمد البقمي"] },
+  { id:"6A", name:"الصف السادس أ",  students:["عبدالله ماجد المزروع","أنس طارق الغامدي","حمزة فهد المطيري","زياد يوسف الزهراني","بكر سعد العتيبي","سامي خالد الأحمدي"] },
+  { id:"6B", name:"الصف السادس ب",  students:["فارس محمد الدوسري","حسن علي الشريف","كريم عبدالله الحازمي","أسامة ناصر الحربي","لؤي سعيد القرني","أيمن وليد الرشيدي"] },
+];
+
+// توليد كود عشوائي 4 أحرف
+function genCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+// ====== إنشاء الإدارة ======
+window.createAdmin = async () => {
+  const email = document.getElementById('adminEmail').value;
+  const pass  = document.getElementById('adminPass').value;
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await setDoc(doc(db, 'users', cred.user.uid), {
+      name: 'الإدارة', role: 'admin', email, createdAt: new Date()
+    });
+    log(`✅ تم إنشاء حساب الإدارة: ${email}`);
+  } catch(e) {
+    log(`❌ خطأ: ${e.message}`);
+  }
+};
+
+// ====== إنشاء معلم ======
+window.createTeacher = async () => {
+  const email = document.getElementById('teacherEmail').value;
+  const pass  = document.getElementById('teacherPass').value;
+  const name  = document.getElementById('teacherName').value;
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await setDoc(doc(db, 'users', cred.user.uid), {
+      name, role: 'teacher', email, createdAt: new Date()
+    });
+    log(`✅ تم إنشاء حساب المعلم: ${name} — ${email}`);
+  } catch(e) {
+    log(`❌ خطأ: ${e.message}`);
+  }
+};
+
+// ====== إضافة الفصول والطلاب ======
+window.seedData = async () => {
+  log('⏳ جاري إضافة البيانات...');
+  try {
+    const batch = writeBatch(db);
+    const codes = new Set();
+
+    for (const cls of classesData) {
+      // إضافة الفصل
+      batch.set(doc(db, 'classes', cls.id), {
+        name: cls.name, id: cls.id
+      });
+
+      // إضافة الطلاب
+      for (const studentName of cls.students) {
+        let code;
+        do { code = genCode(); } while (codes.has(code));
+        codes.add(code);
+
+        const studentRef = doc(collection(db, 'students'));
+        batch.set(studentRef, {
+          name:         studentName,
+          classId:      cls.id,
+          className:    cls.name,
+          code:         code,
+          weeklyPoints: 0,
+          monthlyPoints:0,
+          totalPoints:  0,
+          createdAt:    new Date()
+        });
+
+        log(`  👤 ${studentName} — كود: ${code}`);
+      }
+    }
+
+    await batch.commit();
+    log('✅ تمت إضافة جميع الفصول والطلاب بنجاح!');
+    log('🎉 النظام جاهز للاستخدام!');
+  } catch(e) {
+    log(`❌ خطأ: ${e.message}`);
+  }
+};
+</script>
+</body>
+</html>

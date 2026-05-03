@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام النقاط المدرسي</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1a3c5e;
+    --accent: #f0a500;
+    --accent2: #e8f4fd;
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --text: #1a2b3c;
+    --muted: #7a8fa6;
+    --border: #d8e4f0;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* خلفية زخرفية */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(26,60,94,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -150px; left: -150px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(240,165,0,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 460px;
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* الهيدر */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+    animation: slideDown 0.6s ease;
+  }
+
+  .logo {
+    width: 72px; height: 72px;
+    background: var(--primary);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 24px rgba(26,60,94,0.25);
+  }
+
+  .logo svg { width: 36px; height: 36px; fill: var(--accent); }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 4px;
+  }
+
+  .header p {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  /* البطاقة */
+  .card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 4px 32px rgba(26,60,94,0.08);
+    animation: slideUp 0.6s ease;
+  }
+
+  /* اختيار الدور */
+  .role-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 28px;
+    background: var(--bg);
+    padding: 6px;
+    border-radius: 14px;
+  }
+
+  .role-tab {
+    padding: 10px 8px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .role-tab .icon { font-size: 20px; }
+
+  .role-tab.active {
+    background: var(--card);
+    color: var(--primary);
+    box-shadow: 0 2px 12px rgba(26,60,94,0.1);
+  }
+
+  /* النماذج */
+  .form-section { display: none; }
+  .form-section.active { display: block; animation: fadeIn 0.3s ease; }
+
+  .form-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--bg);
+    transition: all 0.2s ease;
+    direction: ltr;
+    text-align: right;
+    outline: none;
+  }
+
+  .field input:focus {
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(26,60,94,0.06);
+  }
+
+  /* كود الطالب */
+  .code-input-wrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .code-box {
+    width: 100%;
+    aspect-ratio: 1;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary);
+    text-align: center;
+    text-transform: uppercase;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .code-box:focus {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(240,165,0,0.12);
+  }
+
+  /* زر الدخول */
+  .btn-login {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-login:hover {
+    background: #0f2a45;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(26,60,94,0.25);
+  }
+
+  .btn-login:active { transform: translateY(0); }
+
+  /* رسالة الخطأ */
+  .error-msg {
+    background: #fdf0ef;
+    color: var(--danger);
+    border: 1px solid #f5c6c2;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .error-msg.show { display: flex; }
+
+  /* الفوتر */
+  .footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--muted);
+    animation: fadeIn 0.8s ease;
+  }
+
+  /* أنيميشن */
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* مؤشر التحميل */
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .btn-login.loading .spinner { display: block; }
+  .btn-login.loading .btn-text { display: none; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- الهيدر -->
+  <div class="header">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
+      </svg>
+    </div>
+    <h1>نظام النجوم المدرسي</h1>
+    <p>نحفّز الطلاب ونكافئ التميز</p>
+  </div>
+
+  <!-- البطاقة -->
+  <div class="card">
+
+    <!-- اختيار الدور -->
+    <div class="role-tabs">
+      <button class="role-tab active" onclick="switchRole('teacher')">
+        <span class="icon">👨‍🏫</span>
+        <span>معلم</span>
+      </button>
+      <button class="role-tab" onclick="switchRole('student')">
+        <span class="icon">🎓</span>
+        <span>طالب</span>
+      </button>
+      <button class="role-tab" onclick="switchRole('admin')">
+        <span class="icon">🏫</span>
+        <span>إدارة</span>
+      </button>
+    </div>
+
+    <!-- رسالة الخطأ -->
+    <div class="error-msg" id="errorMsg">
+      <span>⚠️</span>
+      <span id="errorText">بيانات غير صحيحة، حاول مجدداً</span>
+    </div>
+
+    <!-- نموذج المعلم -->
+    <div class="form-section active" id="teacherForm">
+      <div class="form-title">دخول المعلم</div>
+      <div class="field">
+        <label>اسم المستخدم</label>
+        <input type="text" placeholder="أدخل اسم المستخدم" id="teacherUser">
+      </div>
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input type="password" placeholder="••••••••" id="teacherPass">
+      </div>
+      <button class="btn-login" onclick="login('teacher')">
+        <div class="spinner"></div>
+        <span class="btn-text">دخول</span>
+      </button>
+    </div>
+
+    <!-- نموذج الطالب -->
+    <div class="form-section" id="studentForm">
+      <div class="form-title">أدخل كودك الخاص</div>
+      <div class="field">
+        <div class="code-input-wrapper">
+          <input class="code-box" maxlength="1" id="c1" oninput="moveNext(this,'c2')" onkeydown="movePrev(event,this,'')">
+          <input class="code-box" maxlength="1" id="c2" oninput="moveNext(this,'c3')" onkeydown="movePrev(event,this,'c1')">
+          <input class="code-box" maxlength="1" id="c3" oninput="moveNext(this,'c4')" onkeydown="movePrev(event,this,'c2')">
+          <input class="code-box" maxlength="1" id="c4" oninput="moveNext(this,'')"  onkeydown="movePrev(event,this,'c3')">
+        </div>
+      </div>
+      <button class="btn-login" onclick="login('student')">
+        <div class="spinner"></div>
+        <span class="btn-text">عرض نقاطي ⭐</span>
+      </button>
+    </div>
+
+    <!-- نموذج الإدارة -->
+    <div class="form-section" id="adminForm">
+      <div class="form-title">دخول الإدارة</div>
+      <div class="field">
+        <label>اسم المستخدم</label>
+        <input type="text" placeholder="أدخل اسم المستخدم" id="adminUser">
+      </div>
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input type="password" placeholder="••••••••" id="adminPass">
+      </div>
+      <button class="btn-login" onclick="login('admin')">
+        <div class="spinner"></div>
+        <span class="btn-text">دخول لوحة الإدارة</span>
+      </button>
+    </div>
+
+  </div>
+
+  <div class="footer">جميع الحقوق محفوظة © نظام النجوم المدرسي</div>
+</div>
+
+<script>
+  // تبديل الأدوار
+  function switchRole(role) {
+    document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
+
+    const tabs = { teacher: 0, student: 1, admin: 2 };
+    document.querySelectorAll('.role-tab')[tabs[role]].classList.add('active');
+    document.getElementById(role + 'Form').classList.add('active');
+
+    hideError();
+  }
+
+  // تنقل بين خانات الكود
+  function moveNext(el, nextId) {
+    el.value = el.value.toUpperCase();
+    if (el.value && nextId) document.getElementById(nextId).focus();
+  }
+
+  function movePrev(e, el, prevId) {
+    if (e.key === 'Backspace' && !el.value && prevId) {
+      document.getElementById(prevId).focus();
+    }
+  }
+
+  // تسجيل الدخول (موك - سيتم ربطه بـ Firebase)
+  function login(role) {
+    hideError();
+
+    const btn = document.querySelector('#' + role + 'Form .btn-login');
+    btn.classList.add('loading');
+
+    setTimeout(() => {
+      btn.classList.remove('loading');
+
+      if (role === 'student') {
+        const code = ['c1','c2','c3','c4'].map(id => document.getElementById(id).value).join('');
+        if (code.length < 4) {
+          showError('أدخل الكود المكون من 4 أحرف كاملاً');
+          return;
+        }
+        // سيتم التحقق من Firebase
+        showError('هذا الكود غير موجود في النظام');
+      } else {
+        const user = document.getElementById(role === 'teacher' ? 'teacherUser' : 'adminUser').value;
+        const pass = document.getElementById(role === 'teacher' ? 'teacherPass' : 'adminPass').value;
+        if (!user || !pass) {
+          showError('يرجى إدخال اسم المستخدم وكلمة المرور');
+          return;
+        }
+        showError('بيانات غير صحيحة، حاول مجدداً');
+      }
+    }, 1200);
+  }
+
+  function showError(msg) {
+    document.getElementById('errorText').textContent = msg;
+    document.getElementById('errorMsg').classList.add('show');
+  }
+
+  function hideError() {
+    document.getElementById('errorMsg').classList.remove('show');
+  }
+</script>
+
+</body>
+</html>
